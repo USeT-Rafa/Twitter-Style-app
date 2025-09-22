@@ -1,10 +1,9 @@
 import express from 'express';
+import authRouthes from './routes/auth.routes.js'; 
 
 const app = express();
 
-app.get('/',(req,res)=>{
-    res.send("Server is up and running");
-});
+app.use("/api/auth", authRouthes);
 
 app.listen(8000,()=>{
     console.log("Server is running on port 8000");
