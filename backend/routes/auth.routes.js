@@ -1,6 +1,6 @@
 import express from 'express';
 import { login, signup, logout, getMe } from '../controllers/auth.controller.js';
-import { protectedRoute } from '../middleware/proctedroute.js';
+import { protectRoute } from '../middleware/proctedroute.js';
 
 const router = express.Router();
 
@@ -10,7 +10,7 @@ router.post("/login", login);
 
 router.post("/logout", logout);
 
-router.get("/me",protectedRoute, getMe);
+router.get("/me",protectRoute, getMe);
 
 
 
