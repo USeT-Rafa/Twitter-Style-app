@@ -80,7 +80,7 @@ export const likeUnlikePost = async (req, res) => {
 
         if(userLikesPost){
             //unlike
-            await post.updateOne({_id : postId}, {$pull: {likes: userId}});
+            await Post.updateOne({_id : postId}, {$pull: {likes: userId}});
             await User.updateOne({_id : userId}, {$pull: {likedPosts: postId}});
             res.status(200).json({ message: 'Post unliked' });
         }else{
@@ -136,7 +136,7 @@ export const commentOnPost = async (req, res) => {
 
 export const getAllPosts = async (req, res) => {
     try {
-        const posts = (await Post.find()).sort({createAt : -1}).populate({
+        const posts = await ( Post.find()).sort({createdAt : -1}).populate({
             path : 'user',
             select : '-password',
         }).populate({
@@ -155,8 +155,9 @@ export const getAllPosts = async (req, res) => {
 }
 
 export const getLikedPosts = async (req, res) => {
+    const userID = req.params.id;
+
     try {
-        const userID = req.params.id;
         const user = await User.findById(userID);
         if(!user){
             return res.status(404).json({ message: 'User not found' });
@@ -168,7 +169,7 @@ export const getLikedPosts = async (req, res) => {
         }).populate({
             path : 'comments.user',
             select : '-password',
-        })
+        });
 
         res.status(200).json(likedPosts);
     } catch (error) {
