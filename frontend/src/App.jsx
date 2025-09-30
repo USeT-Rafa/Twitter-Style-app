@@ -1,15 +1,19 @@
-import { useState } from 'react'
-
+import {Route, Routes} from 'react-router-dom'
+import HomePage from './Pages/Home/HomePage'
+import SignUpPage from './Pages/auth/Signup/SignUpPage'
+import LoginPage from './Pages/auth/Login/LoginPage'
 
 function App() {
-  const [count, setCount] = useState(0)
 
   return (
-    <>
-      <p className='text-5xl text-red-100 bg-blue-700'>
-        lets fucking go
-        </p>
-    </>
+    <div className="flex max-w-6xl mx-auto">
+      <Routes>
+        <Route path="/" element={<HomePage/>}/>
+        <Route path="/signup" element={<SignUpPage/>}/>
+        <Route path="/login" element={<LoginPage/>}/>
+      </Routes>
+
+    </div>
   )
 }
 
