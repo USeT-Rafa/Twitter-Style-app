@@ -19,7 +19,7 @@ cloudinary.config({
 
 const app = express();
 
-app.use(express.json());//to parse resq.body
+app.use(express.json({limit : "5mb"}));//to parse resq.body
 app.use(express.urlencoded({ extended: true }));//to parse form data
 app.use(cookieParser());//to parse cookies
 
