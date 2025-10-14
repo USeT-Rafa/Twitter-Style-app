@@ -8,6 +8,7 @@ import { Link } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import LoadingSpinner from "./LoadingSpinner";
+import {formatPostDate} from "../../utils/Date/index.js"
 
 const Post = ({ post }) => {
 	const [comment, setComment] = useState("");
@@ -46,7 +47,7 @@ const Post = ({ post }) => {
 			try {
 				const res = await fetch(`/api/posts/like/${post._id}`,{
 					method : "POST",
-				})
+				});
 
 				const data = await res.json();
 
@@ -60,7 +61,6 @@ const Post = ({ post }) => {
 			}
 		},
 		onSuccess:(updateLikes)=>{
-			toast.success("Post LIKED successfully");
 			queryClient.setQueryData(["posts"], (oldData) =>{
 				return oldData.map(p =>{
 					if(p._id === post._id){
@@ -117,7 +117,8 @@ const Post = ({ post }) => {
 	const isMyPost = authUser._id === post.user._id;
 ;
 
-	const formattedDate = "1h";
+	const formattedDate = formatPostDate(post.createdAt);
+;
 
 
 	const handleDeletePost = () => {
