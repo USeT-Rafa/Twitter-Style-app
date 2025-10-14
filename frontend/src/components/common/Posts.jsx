@@ -12,6 +12,8 @@ const Posts = ({feedType}) => {
 				return "api/posts/all";
 			case "following":
 				return "api/posts/following";
+			case "posts":
+				return `api/posts/profile/${username}`
 			default:
 				return "api/posts/all";
 		}
