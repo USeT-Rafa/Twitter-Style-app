@@ -7,12 +7,16 @@ import EditProfileModal from "./EditProfileModal";
 
 import { POSTS } from "../../utils/db/dummy";
 
+import useFollow from "../../components/hooks/useFollow";
+
 import { FaArrowLeft } from "react-icons/fa6";
 import { IoCalendarOutline } from "react-icons/io5";
 import { FaLink } from "react-icons/fa";
 import { MdEdit } from "react-icons/md";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { formatMemberSinceDate } from "../../utils/Date";
+import LoadingSpinner from "../../components/common/LoadingSpinner";
+import { application } from "express";
 
 const ProfilePage = () => {
 	useQuery({queryKey:['authUser']});
@@ -23,10 +27,15 @@ const ProfilePage = () => {
 
 	const coverImgRef = useRef(null);
 	const profileImgRef = useRef(null);
+	const queryClient = useQueryClient();
 
 	const {username} = useParams();
 
-	const isMyProfile = true;
+	const {follow, isPending}= useFollow();
+
+	const {data:authUser} = useQuery({
+		queryKey :["authUser"]
+	})
 
 	const{data:user, isLoading , refetch, isRefetching} = useQuery({
 		queryKey:["userProfile"],
@@ -46,7 +55,44 @@ const ProfilePage = () => {
 		},
 	})
 
+	const{mutate:updateProfile, isPending: isUpdatingProfile} = useMutation({
+	mutationFn:async ()=>{
+		try {
+			const res = await fetch(`/api/user/update`,{
+				method:"POST",
+				header : {
+					"Conten-Type" : "application/json",
+				},
+				body : JSON.stringify({
+					coverImg,
+					profileImg
+				}),
+			});
+			const data = await res.json();
+
+			if(!res.ok){
+				throw new Error(data.error||"Something went wrong");
+			}
+			return data
+		} catch (error) {
+			throw new Error(error);
+		}
+	},
+	onSuccess : ()=> {
+		Promise.all([
+			queryClient.invalidateQueries({queryKey:["authUser"]}),
+			queryClient.invalidateQueries({queryKey:["userProfile"]})
+		])
+		toast.success("Profile Update successfully");
+	},
+	onError :() => {
+		toast.error("Update Failed")
+	}
+});
+
+	const isMyProfile = authUser._id === user?._id;
 	const memberDate = formatMemberSinceDate(user?.createdAt);
+	const amIFollwing = authUser?.following.includes(user?._id);
 
 
 	const handleImgChange = (e, state) => {
@@ -132,9 +178,11 @@ const ProfilePage = () => {
 								{!isMyProfile && (
 									<button
 										className='btn btn-outline rounded-full btn-sm'
-										onClick={() => alert("Followed successfully")}
+										onClick={() => follow(user._id)}
 									>
-										Follow
+										{isPending && "Loading...."}
+										{!isPending && amIFollwing && "Unfollow"}
+										{!isPending && !amIFollwing && "Follow"}
 									</button>
 								)}
 								{(coverImg || profileImg) && (
@@ -211,7 +259,7 @@ const ProfilePage = () => {
 						</>
 					)}
 
-					<Posts username={username} />
+					<Posts feedType={feedType} username={username} userId={user?._id}/>
 				</div>
 			</div>
 		</>
